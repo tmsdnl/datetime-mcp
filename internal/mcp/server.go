@@ -8,11 +8,11 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 	_ "time/tzdata"
 
-	"github.com/adrg/xdg"
 	"github.com/tmsdnl/datetime-mcp/internal/datetime"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 )
@@ -31,7 +31,7 @@ func Run(cfg Config) error {
 
 	dir := cfg.FormatsDir
 	if dir == "" {
-		dir = xdg.ConfigHome + "/datetime-mcp/formats"
+		dir = defaultFormatsDir()
 	}
 
 	fmts, errs := formats.Load(dir)
@@ -191,6 +191,14 @@ func (s *server) handleInitialize(req jsonrpcRequest) *jsonrpcResponse {
 		},
 	}
 	return resultResponse(req.ID, result)
+}
+
+func defaultFormatsDir() string {
+	if base := os.Getenv("XDG_CONFIG_HOME"); base != "" {
+		return filepath.Join(base, "datetime-mcp", "formats")
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".config", "datetime-mcp", "formats")
 }
 
 func makeLogger(enabled bool) func(string, ...any) {

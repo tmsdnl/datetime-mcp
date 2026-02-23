@@ -366,7 +366,7 @@ template: "Deployed at {iso8601} ({timezone}) by CI"
 | NF-001 | The binary MUST be written in Go. |
 | NF-002 | The binary MUST compile as a statically linked executable with `CGO_ENABLED=0`. |
 | NF-003 | The binary MUST have zero runtime dependencies. |
-| NF-004 | The binary MUST use `github.com/adrg/xdg` for cross-platform XDG Base Directory resolution. |
+| NF-004 | The binary MUST resolve the default formats directory as `$XDG_CONFIG_HOME/datetime-mcp/formats` if the `XDG_CONFIG_HOME` environment variable is set, otherwise `~/.config/datetime-mcp/formats`. This produces a consistent, accessible path on macOS and Linux without platform-specific library overrides. |
 | NF-005 | The `--version` output MUST include: semantic version, Git commit hash (short), and build date (ISO 8601). Injected via `-ldflags` at build time. |
 | NF-006 | A Makefile MUST support cross-compilation for: macOS (arm64, amd64), Linux (arm64, amd64), Windows (arm64, amd64). |
 | NF-007 | A `.goreleaser.yml` MUST be included for automated release builds. |

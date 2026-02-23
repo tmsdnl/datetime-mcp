@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	_ "time/tzdata"
 
-	"github.com/adrg/xdg"
 	"github.com/tmsdnl/datetime-mcp/internal/detect"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 	"github.com/tmsdnl/datetime-mcp/internal/hook"
@@ -72,10 +72,18 @@ func main() {
 	}
 }
 
+func defaultFormatsDir() string {
+	if base := os.Getenv("XDG_CONFIG_HOME"); base != "" {
+		return filepath.Join(base, "datetime-mcp", "formats")
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".config", "datetime-mcp", "formats")
+}
+
 func printHelp(formatsDir string) {
 	dir := formatsDir
 	if dir == "" {
-		dir = xdg.ConfigHome + "/datetime-mcp/formats"
+		dir = defaultFormatsDir()
 	}
 
 	fmt.Print(`datetime-mcp [flags]
