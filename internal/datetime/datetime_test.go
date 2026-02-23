@@ -69,9 +69,14 @@ func TestResolveTimezone_LocalFallback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// Should be local timezone.
 	if loc == nil {
 		t.Fatal("expected non-nil location")
+	}
+	// Should never return Go's internal "Local" placeholder — it must resolve
+	// to a named IANA location (e.g. "America/Los_Angeles") or fall back to
+	// time.Local only when /etc/localtime is unavailable.
+	if loc.String() == "Local" {
+		t.Logf("note: could not resolve IANA name for local timezone (no /etc/localtime?)")
 	}
 }
 

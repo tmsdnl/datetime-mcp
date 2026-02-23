@@ -92,7 +92,7 @@ func ldmlToGoLayout(s string) (string, bool) {
 		matched := false
 		for _, tok := range ldmlTokens {
 			if strings.HasPrefix(s[i:], tok.ldml) {
-				leftOK := i == 0 || !isLetter(s[i-1]) || prevWasToken
+				leftOK := i == 0 || !isLetter(s[i-1]) || (prevWasToken && s[i] != s[i-1])
 				if !leftOK {
 					// All shorter tokens starting with the same char share the
 					// same left boundary, so none will match — stop trying.

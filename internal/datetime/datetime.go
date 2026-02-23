@@ -2,6 +2,7 @@ package datetime
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -28,7 +29,22 @@ func ResolveTimezone(tzFlag, tzEnv string) (*time.Location, error) {
 		}
 		return loc, nil
 	}
-	return time.Local, nil
+	return localLocation(), nil
+}
+
+// localLocation returns the system local timezone as a named *time.Location.
+// It reads the /etc/localtime symlink (macOS/Linux) to obtain the IANA name,
+// avoiding Go's "Local" placeholder which is unhelpful in formatted output.
+func localLocation() *time.Location {
+	if link, err := os.Readlink("/etc/localtime"); err == nil {
+		const marker = "/zoneinfo/"
+		if i := strings.LastIndex(link, marker); i >= 0 {
+			if loc, err := time.LoadLocation(link[i+len(marker):]); err == nil {
+				return loc
+			}
+		}
+	}
+	return time.Local
 }
 
 // ISO8601Fallback formats t in RFC 3339 / ISO 8601 format.

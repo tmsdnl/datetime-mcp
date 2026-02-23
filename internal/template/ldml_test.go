@@ -224,6 +224,32 @@ func TestLDMLDoubledSingleQuote(t *testing.T) {
 	}
 }
 
+func TestLDMLRepeatedSingleCharToken(t *testing.T) {
+	tm := refTime(t)
+
+	// {aaa} — 'a' is an LDML token, but same-char chaining is disallowed.
+	// Only the first 'a' should be converted; the rest are literal.
+	// Result must NOT be "PMPMPM".
+	goLayout, ok := ldmlToGoLayout("aaa")
+	if !ok {
+		t.Fatal("expected ok=true (first 'a' is LDML)")
+	}
+	got := tm.Format(goLayout)
+	if got == "PMPMPM" {
+		t.Errorf("same-char chaining produced PMPMPM; fix the boundary rule")
+	}
+
+	// {hhh} — same rule applies to 'h'.
+	goLayout2, ok2 := ldmlToGoLayout("hhh")
+	if !ok2 {
+		t.Fatal("expected ok=true (first 'h' is LDML)")
+	}
+	got2 := tm.Format(goLayout2)
+	if got2 == "222" {
+		t.Errorf("same-char chaining produced %q for {hhh}; fix the boundary rule", got2)
+	}
+}
+
 func TestLDMLNoTokens(t *testing.T) {
 	// Strings with no LDML tokens → returns false.
 	// Note: single-char tokens (h, a, z, Z) only trigger LDML when they appear
