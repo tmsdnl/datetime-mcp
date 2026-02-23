@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: datetime-mcp
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: datetime-mcp
+    main: ./cmd/datetime-mcp
+    binary: datetime-mcp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - formats/*
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+brews:
+  - name: datetime-mcp
+    repository:
+      owner: tmsdnl
+      name: homebrew-mcp
+    directory: Formula
+    homepage: "https://github.com/tmsdnl/datetime-mcp"
+    description: "Self-contained date/time provider for Claude Desktop and Claude Code"
+    license: "MIT"
+    install: |
+      bin.install "datetime-mcp"
+      formats_dir = "#{Dir.home}/.config/datetime-mcp/formats"
+      FileUtils.mkdir_p(formats_dir)
+      Dir.glob("formats/*.yaml").each do |f|
+        FileUtils.cp(f, formats_dir)
+      end
+    test: |
+      system "#{bin}/datetime-mcp", "--version"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
