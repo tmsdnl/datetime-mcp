@@ -1,0 +1,7 @@
+# Build output
+/datetime-mcp
+/datetime-mcp.exe
+dist/
+
+# Claude Code session data
+.claude/
