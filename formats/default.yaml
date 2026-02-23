@@ -1,0 +1,2 @@
+description: "Default hook output with context prefix"
+template: "[CONTEXT] Current date/time: {EEEE}, {yyyy-MM-dd} {HH:mm:ss} {z} ({timezone}) | ISO: {iso8601}"

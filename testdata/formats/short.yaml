@@ -1,0 +1,2 @@
+description: "Date and time without timezone"
+template: "{yyyy-MM-dd} {HH:mm:ss}"

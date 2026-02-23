@@ -1,0 +1,2 @@
+description: "Deploy log line"
+template: "Deployed at {iso8601} ({timezone}) by CI"

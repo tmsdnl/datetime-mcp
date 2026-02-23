@@ -1,0 +1,2 @@
+description: "Email/HTTP date format (RFC 2822)"
+template: "{EEE, dd MMM yyyy HH:mm:ss Z}"
