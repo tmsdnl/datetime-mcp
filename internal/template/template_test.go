@@ -111,6 +111,29 @@ func TestRender_EscapedBraces(t *testing.T) {
 	}
 }
 
+func TestRender_EscapedClosingBrace(t *testing.T) {
+	e := New(nil, nil)
+	tm := testTime(t)
+	// }} in isolation should produce a single literal }
+	got := e.Render("text}}", tm, nil)
+	want := "text}"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestRender_EscapedBracesMixed(t *testing.T) {
+	e := New(nil, nil)
+	tm := testTime(t)
+	// {{ produces {, B is a literal character, }} produces }
+	// So A{{B}}C → A + { + B + } + C = "A{B}C"
+	got := e.Render("A{{B}}C", tm, nil)
+	want := "A{B}C"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestRender_UnresolvablePlaceholder(t *testing.T) {
 	e := New(nil, nil)
 	tm := testTime(t)

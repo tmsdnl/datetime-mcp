@@ -22,6 +22,7 @@ type Config struct {
 	Timezone   string // default IANA tz; empty = TZ env or local
 	FormatsDir string // override XDG formats directory
 	Log        bool
+	Version    string // binary version injected at build time
 }
 
 // Run starts the MCP server. It reads JSON-RPC messages from stdin and writes
@@ -40,6 +41,12 @@ func Run(cfg Config) error {
 	}
 	reg := formats.NewRegistry(fmts)
 
+	if reg.IsEmpty() {
+		fmt.Fprintf(os.Stderr, "note: no format files found in %s\n"+
+			"  For default output, download format files from:\n"+
+			"  https://github.com/tmsdnl/datetime-mcp/tree/main/formats\n", dir)
+	}
+
 	tzEnv := os.Getenv("TZ")
 	defaultLoc, err := datetime.ResolveTimezone(cfg.Timezone, tzEnv)
 	if err != nil {
@@ -54,17 +61,18 @@ func Run(cfg Config) error {
 		logger:     logger,
 		in:         os.Stdin,
 		out:        os.Stdout,
+		version:    cfg.Version,
 	}
 	return srv.serve()
 }
 
 type server struct {
-	reg         *formats.Registry
-	defaultLoc  *time.Location
-	logger      func(string, ...any)
-	in          io.Reader
-	out         io.Writer
-	initialized bool
+	reg        *formats.Registry
+	defaultLoc *time.Location
+	logger     func(string, ...any)
+	in         io.Reader
+	out        io.Writer
+	version    string
 }
 
 func (s *server) serve() error {
@@ -79,6 +87,9 @@ func (s *server) serve() error {
 		case <-sigCh:
 			s.logger("received shutdown signal")
 			cancel()
+			if c, ok := s.in.(io.Closer); ok {
+				c.Close()
+			}
 		case <-ctx.Done():
 		}
 	}()
@@ -163,7 +174,6 @@ func (s *server) handleMessage(data []byte) *jsonrpcResponse {
 	case "initialize":
 		return s.handleInitialize(req)
 	case "initialized":
-		s.initialized = true
 		return nil // notification, no response
 	case "ping":
 		return resultResponse(req.ID, map[string]any{})
@@ -186,7 +196,7 @@ func (s *server) handleInitialize(req jsonrpcRequest) *jsonrpcResponse {
 		},
 		"serverInfo": map[string]any{
 			"name":        "datetime-mcp",
-			"version":     "0.0.0", // replaced at build time
+			"version":     s.version,
 			"description": "Self-contained date/time provider for Claude Desktop and Claude Code",
 		},
 	}

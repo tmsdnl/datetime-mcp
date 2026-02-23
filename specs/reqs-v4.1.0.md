@@ -115,7 +115,7 @@ All formats are loaded from disk at runtime. There is no embedding.
 | ID | Requirement |
 |----|-------------|
 | F-060 | The binary MUST load format files from the formats directory at startup. |
-| F-061 | The default formats directory MUST follow XDG conventions using the `github.com/adrg/xdg` library for cross-platform path resolution. The path MUST be `{xdg.ConfigHome}/datetime-mcp/formats/`. |
+| F-061 | The default formats directory MUST be `$XDG_CONFIG_HOME/datetime-mcp/formats/` when `XDG_CONFIG_HOME` is set, otherwise `~/.config/datetime-mcp/formats/`. No third-party library is required; the path is resolved inline. |
 | F-062 | A `--formats-dir` flag MUST allow overriding the formats directory. |
 | F-063 | All `.yaml` and `.yml` files in the formats directory MUST be loaded. |
 | F-064 | If the formats directory does not exist, the binary MUST proceed with no loaded formats (falling back to ISO 8601 for default output and MCP tool responses). |

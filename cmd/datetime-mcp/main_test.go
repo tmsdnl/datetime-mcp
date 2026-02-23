@@ -111,6 +111,11 @@ func TestHelp_ListsFormats(t *testing.T) {
 			t.Errorf("--help missing format name %q in output:\n%s", name, stdout)
 		}
 	}
+	for _, desc := range []string{"RFC 3339 with timezone offset", "Email/HTTP date format (RFC 2822)", "Default hook output with context prefix"} {
+		if !strings.Contains(stdout, desc) {
+			t.Errorf("--help missing format description %q", desc)
+		}
+	}
 }
 
 func TestMCPMode_Initialize(t *testing.T) {

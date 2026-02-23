@@ -110,7 +110,16 @@ func TestRegistry_DuplicateNames(t *testing.T) {
 		t.Fatal("iso8601 not found")
 	}
 	if tmpl != "third" {
-		t.Errorf("expected last value to win, got %q", tmpl)
+		t.Errorf("expected last value to win in Get(), got %q", tmpl)
+	}
+
+	// Map() must agree with Get() for the same name (BUG-02).
+	m := r.Map()
+	if m["iso8601"] != "third" {
+		t.Errorf("expected Map()[\"iso8601\"] = \"third\" (last value wins), got %q", m["iso8601"])
+	}
+	if m["iso8601"] != tmpl {
+		t.Errorf("Map()[\"iso8601\"] = %q, Get(\"iso8601\") = %q: they must agree", m["iso8601"], tmpl)
 	}
 
 	all := r.All()

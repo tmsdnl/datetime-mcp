@@ -97,14 +97,8 @@ func (e *Engine) resolvePlaceholder(expr string, t time.Time, visited map[string
 	// Priority 1: built-in keywords (F-073, F-074, F-075).
 	switch expr {
 	case "unix":
-		if _, conflict := e.formats["unix"]; conflict {
-			e.log("warning: format file named %q conflicts with built-in keyword; built-in wins", "unix")
-		}
 		return fmt.Sprintf("%d", t.Unix())
 	case "timezone":
-		if _, conflict := e.formats["timezone"]; conflict {
-			e.log("warning: format file named %q conflicts with built-in keyword; built-in wins", "timezone")
-		}
 		return t.Location().String()
 	}
 

@@ -41,7 +41,20 @@ func TestIsTerminal_Nil(t *testing.T) {
 }
 
 func TestIsTerminal_Stdin(t *testing.T) {
-	// When running under go test, stdin is not a terminal.
-	// This test just ensures the function doesn't panic.
-	_ = IsTerminal(os.Stdin)
+	// In test environments stdin is always a pipe, never a TTY.
+	// Redirect os.Stdin to a pipe to ensure a controlled, non-TTY file descriptor.
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	defer w.Close()
+
+	origStdin := os.Stdin
+	os.Stdin = r
+	defer func() { os.Stdin = origStdin }()
+
+	if IsTerminal(os.Stdin) {
+		t.Error("expected false: stdin is a pipe in test environment")
+	}
 }

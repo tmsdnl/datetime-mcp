@@ -53,6 +53,7 @@ func main() {
 			Timezone:   *tz,
 			FormatsDir: *formatsDir,
 			Log:        *logFlag,
+			Version:    version,
 		}); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)

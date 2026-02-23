@@ -7,6 +7,23 @@ import (
 	_ "time/tzdata"
 )
 
+func TestHandleToolsCall_InvalidFormat(t *testing.T) {
+	s := testServer(t)
+	resp := s.exchange(t, map[string]any{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "tools/call",
+		"params": map[string]any{
+			"name":      "get_current_datetime",
+			"arguments": map[string]any{"format": "does-not-exist"},
+		},
+	})
+	result := resp["result"].(map[string]any)
+	if result["isError"] != true {
+		t.Errorf("expected isError=true for unknown format, got: %v", result)
+	}
+}
+
 func TestToolDefinition(t *testing.T) {
 	tool := toolDefinition()
 

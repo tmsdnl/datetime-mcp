@@ -325,7 +325,7 @@ func TestTimezoneConversion_CrossDayBoundary(t *testing.T) {
 	if localTime.Day() != 24 {
 		// Some Pacific/Apia offsets may vary; check that the day changed.
 		// Pacific/Apia is UTC+13 (or +14), so 23:00 UTC = 12:00 or 13:00 next day.
-		t.Logf("localTime day=%d (expected 24), location=%s, offset=%v", localTime.Day(), loc, localTime.Format("-07:00"))
+		t.Errorf("localTime day=%d (expected 24), location=%s, offset=%v", localTime.Day(), loc, localTime.Format("-07:00"))
 	}
 
 	// The date in the formatted output should reflect the local timezone.
@@ -345,7 +345,7 @@ func TestTimezoneConversion_WesternBoundary(t *testing.T) {
 	localTime := utcTime.In(loc)
 
 	if localTime.Day() != 23 {
-		t.Logf("localTime day=%d (expected 23), location=%s", localTime.Day(), loc)
+		t.Errorf("localTime day=%d (expected 23), location=%s", localTime.Day(), loc)
 	}
 
 	got := ISO8601Fallback(localTime)

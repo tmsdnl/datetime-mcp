@@ -3,6 +3,7 @@ package mcp
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
@@ -113,6 +114,27 @@ func (s *server) callGetCurrentDatetime(id json.RawMessage, tzOverride, formatSt
 	// Default format for MCP tool is iso8601.
 	if formatStr == "" {
 		formatStr = "iso8601"
+	}
+
+	if formatStr == "iso8601" {
+		if _, ok := s.reg.Get("iso8601"); !ok {
+			formatted := datetime.ISO8601Fallback(t)
+			sc := datetime.NewStructuredContent(t, formatted)
+			result := map[string]any{
+				"content":           []any{map[string]any{"type": "text", "text": formatted}},
+				"structuredContent": map[string]any{"datetime": sc.Datetime, "timezone": sc.Timezone, "utc_offset": sc.UTCOffset, "unix": sc.Unix},
+				"isError":           false,
+			}
+			return resultResponse(id, result)
+		}
+	}
+
+	// In MCP strict mode, a format string that is not a template (no '{') and is
+	// not found in the registry is treated as an unknown named format.
+	if !strings.Contains(formatStr, "{") {
+		if _, ok := s.reg.Get(formatStr); !ok {
+			return toolErrorResponse(id, fmt.Sprintf("unknown format: %q", formatStr))
+		}
 	}
 
 	f := datetime.New(s.reg, func(msg string) { s.logger("%s", msg) })

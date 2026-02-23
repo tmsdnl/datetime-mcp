@@ -140,6 +140,45 @@ func TestLoad_YMLExtension(t *testing.T) {
 	}
 }
 
+func TestLoad_DuplicateYAMLAndYML_RegistryConsistency(t *testing.T) {
+	dir := t.TempDir()
+
+	// foo.yaml loaded first (alphabetically), foo.yml loaded second.
+	fooYAML := filepath.Join(dir, "foo.yaml")
+	fooYML := filepath.Join(dir, "foo.yml")
+	if err := os.WriteFile(fooYAML, []byte("description: first\ntemplate: \"first\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(fooYML, []byte("description: second\ntemplate: \"second\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	fmts, errs := Load(dir)
+	// Both files should load without fatal errors.
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors loading duplicate foo files: %v", errs)
+	}
+	if len(fmts) != 2 {
+		t.Fatalf("expected 2 raw formats (one per file), got %d", len(fmts))
+	}
+
+	reg := NewRegistry(fmts)
+
+	getTemplate, ok := reg.Get("foo")
+	if !ok {
+		t.Fatal("expected Get(\"foo\") to find the format")
+	}
+
+	mapTemplate, exists := reg.Map()["foo"]
+	if !exists {
+		t.Fatal("expected Map()[\"foo\"] to contain the format")
+	}
+
+	if getTemplate != mapTemplate {
+		t.Errorf("Get(\"foo\") = %q, Map()[\"foo\"] = %q: they must agree", getTemplate, mapTemplate)
+	}
+}
+
 func TestLoad_SkipsNonYAMLFiles(t *testing.T) {
 	dir := t.TempDir()
 	for _, name := range []string{"readme.md", "note.txt", "binary.bin"} {

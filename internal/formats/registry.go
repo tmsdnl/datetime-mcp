@@ -51,7 +51,7 @@ func (r *Registry) Map() map[string]string {
 	}
 	m := make(map[string]string, len(r.ordered))
 	for _, f := range r.ordered {
-		m[f.Name] = f.Template
+		m[f.Name] = r.byName[f.Name].Template
 	}
 	return m
 }
