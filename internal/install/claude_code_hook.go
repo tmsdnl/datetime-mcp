@@ -146,10 +146,14 @@ func removeClaudeCodeHook(exePath string, dryRun bool) Result {
 				continue
 			}
 			cmd := hook["command"]
+			stale := false
 			if resolved, err := filepath.EvalSymlinks(cmd); err == nil {
 				cmd = resolved
+			} else {
+				// Path no longer exists; treat as stale if same binary name.
+				stale = filepath.Base(cmd) == filepath.Base(exePath)
 			}
-			if cmd == exePath {
+			if cmd == exePath || stale {
 				removed = true
 			} else {
 				keptHooks = append(keptHooks, h)
