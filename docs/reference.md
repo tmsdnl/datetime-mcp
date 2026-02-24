@@ -127,7 +127,7 @@ With timezone override:
 ### Claude Code MCP
 
 ```sh
-claude mcp add --scope user datetime /usr/local/bin/datetime-mcp --mcp
+claude mcp add --scope user datetime -- /usr/local/bin/datetime-mcp --mcp
 ```
 
 ### Codex (`~/.codex/config.toml`)

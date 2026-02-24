@@ -30,15 +30,15 @@ func installClaudeCodeMCP(exePath string, dryRun bool) Result {
 
 	if dryRun {
 		return Result{Target: "Claude Code MCP", Status: StatusAdded, Path: path, DryRun: true,
-			Note: "claude mcp add --scope user datetime " + exePath + " --mcp"}
+			Note: "claude mcp add --scope user datetime -- " + exePath + " --mcp"}
 	}
 
 	// Delegate to claude CLI.
 	if _, err := exec.LookPath("claude"); err != nil {
 		return Result{Target: "Claude Code MCP", Status: StatusError, Path: path,
-			Err: fmt.Errorf("claude CLI not found in PATH — run: claude mcp add --scope user datetime %s --mcp", exePath)}
+			Err: fmt.Errorf("claude CLI not found in PATH — run: claude mcp add --scope user datetime -- %s --mcp", exePath)}
 	}
-	cmd := exec.Command("claude", "mcp", "add", "--scope", "user", "datetime", exePath, "--mcp")
+	cmd := exec.Command("claude", "mcp", "add", "--scope", "user", "datetime", "--", exePath, "--mcp")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return Result{Target: "Claude Code MCP", Status: StatusError, Path: path,
 			Err: fmt.Errorf("claude mcp add: %w: %s", err, out)}
