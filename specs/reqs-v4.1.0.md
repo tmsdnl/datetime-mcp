@@ -731,7 +731,7 @@ datetime-mcp/
 28. Deleting a format file removes that format from the next invocation.
 29. `--help` lists all loaded format names with descriptions.
 30. On first run with no format files, the binary prints a message about obtaining format files.
-31. XDG paths resolve correctly on macOS, Linux, and Windows (via `adrg/xdg`).
+31. XDG paths resolve correctly on macOS and Linux (`$XDG_CONFIG_HOME` or `~/.config`). On Windows, `~/.config` is used as fallback (no platform-specific path mapping).
 32. All cross-compilation targets build via `make all`.
 33. `go test ./...` passes with no external dependencies.
 34. Pushing a `v*` tag triggers GitHub Actions, runs tests, and publishes a GitHub release with binaries and shipped format files for all six platform targets, checksums file, and Homebrew formula update to `tmsdnl/mcp`.
