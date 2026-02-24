@@ -45,6 +45,7 @@ brews:
     repository:
       owner: tmsdnl
       name: homebrew-mcp
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
     homepage: "https://github.com/tmsdnl/datetime-mcp"
     description: "Self-contained date/time provider for Claude Desktop and Claude Code"
