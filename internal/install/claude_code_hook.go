@@ -41,7 +41,8 @@ func installClaudeCodeHook(exePath string, dryRun bool) Result {
 		}
 	}
 
-	// Idempotency check: search for exePath in any SessionStart hook command.
+	// Idempotency check: search for any hook whose command is our binary
+	// (matched by binary name, to catch versioned/cached paths from old installs).
 	for _, elem := range sessionStart {
 		var entry map[string]json.RawMessage
 		if err := json.Unmarshal(elem, &entry); err != nil {
@@ -56,11 +57,7 @@ func installClaudeCodeHook(exePath string, dryRun bool) Result {
 			if err := json.Unmarshal(h, &hook); err != nil {
 				continue
 			}
-			cmd := hook["command"]
-			if resolved, err := filepath.EvalSymlinks(cmd); err == nil {
-				cmd = resolved
-			}
-			if cmd == exePath {
+			if filepath.Base(hook["command"]) == filepath.Base(exePath) {
 				return Result{Target: "Hook", Status: StatusExisting, Path: path}
 			}
 		}
@@ -145,15 +142,10 @@ func removeClaudeCodeHook(exePath string, dryRun bool) Result {
 				keptHooks = append(keptHooks, h)
 				continue
 			}
-			cmd := hook["command"]
-			stale := false
-			if resolved, err := filepath.EvalSymlinks(cmd); err == nil {
-				cmd = resolved
-			} else {
-				// Path no longer exists; treat as stale if same binary name.
-				stale = filepath.Base(cmd) == filepath.Base(exePath)
-			}
-			if cmd == exePath || stale {
+			// Remove any hook whose command is our binary name, regardless of
+			// path — this cleans up versioned Cellar paths, go-build cache
+			// paths, and other stale entries from previous installs.
+			if filepath.Base(hook["command"]) == filepath.Base(exePath) {
 				removed = true
 			} else {
 				keptHooks = append(keptHooks, h)
