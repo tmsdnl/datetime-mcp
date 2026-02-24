@@ -78,6 +78,10 @@ func installClaudeDesktop(exePath string, dryRun bool) Result {
 func removeClaudeDesktop(dryRun bool) Result {
 	path := claudeDesktopConfigPath()
 
+	if _, err := os.Stat(filepath.Dir(path)); errors.Is(err, os.ErrNotExist) {
+		return Result{Target: "Claude Desktop", Status: StatusNotFound, Path: path}
+	}
+
 	top, err := readJSONObject(path)
 	if err != nil {
 		return Result{Target: "Claude Desktop", Status: StatusError, Path: path, Err: err}
