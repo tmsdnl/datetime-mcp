@@ -11,7 +11,7 @@ import (
 	"github.com/tmsdnl/datetime-mcp/internal/format"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 	"github.com/tmsdnl/datetime-mcp/internal/hook"
-	"github.com/tmsdnl/datetime-mcp/internal/install"
+	"github.com/tmsdnl/datetime-mcp/internal/mcpcmd"
 	"github.com/tmsdnl/datetime-mcp/internal/mcp"
 )
 
@@ -35,9 +35,9 @@ func main() {
 			}
 			switch os.Args[2] {
 			case "add":
-				install.RunMCPAdd(os.Args[3:], exe)
+				mcpcmd.RunMCPAdd(os.Args[3:], exe)
 			case "remove":
-				install.RunMCPRemove(os.Args[3:], exe)
+				mcpcmd.RunMCPRemove(os.Args[3:], exe)
 			default:
 				fmt.Fprintf(os.Stderr, "unknown mcp subcommand %q — use add or remove\n", os.Args[2])
 				os.Exit(1)
