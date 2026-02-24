@@ -46,3 +46,24 @@ func installCodexMCP(exePath string, dryRun bool) Result {
 	}
 	return Result{Target: "Codex MCP", Status: StatusAdded, Path: path}
 }
+
+func removeCodexMCP(dryRun bool) Result {
+	home, _ := os.UserHomeDir()
+	path := filepath.Join(home, ".codex", "config.toml")
+
+	if dryRun {
+		return Result{Target: "Codex MCP", Status: StatusAdded, Path: path, DryRun: true,
+			Note: "codex mcp remove datetime-mcp"}
+	}
+
+	if _, err := exec.LookPath("codex"); err != nil {
+		return Result{Target: "Codex MCP", Status: StatusError, Path: path,
+			Err: fmt.Errorf("codex CLI not found in PATH — run: codex mcp remove datetime-mcp")}
+	}
+	cmd := exec.Command("codex", "mcp", "remove", "datetime-mcp")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return Result{Target: "Codex MCP", Status: StatusError, Path: path,
+			Err: fmt.Errorf("codex mcp remove: %w: %s", err, out)}
+	}
+	return Result{Target: "Codex MCP", Status: StatusRemoved, Path: path}
+}

@@ -22,11 +22,29 @@ var (
 )
 
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "install" {
+	if len(os.Args) > 1 {
 		exe, _ := os.Executable()
 		exe, _ = filepath.EvalSymlinks(exe)
-		install.Run(os.Args[2:], exe)
-		return
+		switch os.Args[1] {
+		case "install":
+			install.Run(os.Args[2:], exe)
+			return
+		case "mcp":
+			if len(os.Args) < 3 {
+				fmt.Fprintf(os.Stderr, "usage: datetime-mcp mcp <add|remove> [flags]\n")
+				os.Exit(1)
+			}
+			switch os.Args[2] {
+			case "add":
+				install.RunMCPAdd(os.Args[3:], exe)
+			case "remove":
+				install.RunMCPRemove(os.Args[3:], exe)
+			default:
+				fmt.Fprintf(os.Stderr, "unknown mcp subcommand %q — use add or remove\n", os.Args[2])
+				os.Exit(1)
+			}
+			return
+		}
 	}
 
 	var (
@@ -140,10 +158,14 @@ Prints the current date/time by default, or starts an MCP server with --mcp.
 
 Usage:
   datetime-mcp [flags]
-  datetime-mcp install [--claude-code-hook] [--claude-desktop] [--claude-code-mcp] [--codex-mcp] [--dry-run]
+  datetime-mcp mcp add    [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
+  datetime-mcp mcp remove [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
+  datetime-mcp install    [--claude-code-hook] [--claude-desktop] [--claude-code-mcp] [--codex-mcp] [--dry-run]
 
 Subcommands:
-  install             Register with supported AI tool integrations
+  mcp add             Register with AI tool integrations
+  mcp remove          Remove from AI tool integrations
+  install             Alias for mcp add (deprecated)
 
 Flags:
   --mcp               Run as MCP server (stdio JSON-RPC)

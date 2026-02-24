@@ -74,3 +74,43 @@ func installClaudeDesktop(exePath string, dryRun bool) Result {
 	}
 	return Result{Target: "Claude Desktop", Status: StatusAdded, Path: path}
 }
+
+func removeClaudeDesktop(dryRun bool) Result {
+	path := claudeDesktopConfigPath()
+
+	top, err := readJSONObject(path)
+	if err != nil {
+		return Result{Target: "Claude Desktop", Status: StatusError, Path: path, Err: err}
+	}
+
+	mcpServers := map[string]json.RawMessage{}
+	if raw, ok := top["mcpServers"]; ok {
+		if err := json.Unmarshal(raw, &mcpServers); err != nil {
+			return Result{Target: "Claude Desktop", Status: StatusError, Path: path,
+				Err: fmt.Errorf("parsing mcpServers: %w", err)}
+		}
+	}
+
+	if _, ok := mcpServers["datetime"]; !ok {
+		return Result{Target: "Claude Desktop", Status: StatusNotFound, Path: path,
+			Message: "datetime not registered as MCP server"}
+	}
+
+	if dryRun {
+		return Result{Target: "Claude Desktop", Status: StatusRemoved, Path: path, DryRun: true,
+			Note: fmt.Sprintf("remove datetime from mcpServers in %s", shortPath(path))}
+	}
+
+	delete(mcpServers, "datetime")
+
+	serialized, err := json.Marshal(mcpServers)
+	if err != nil {
+		return Result{Target: "Claude Desktop", Status: StatusError, Path: path, Err: err}
+	}
+	top["mcpServers"] = json.RawMessage(serialized)
+
+	if err := writeJSONObject(path, top); err != nil {
+		return Result{Target: "Claude Desktop", Status: StatusError, Path: path, Err: err}
+	}
+	return Result{Target: "Claude Desktop", Status: StatusRemoved, Path: path}
+}
