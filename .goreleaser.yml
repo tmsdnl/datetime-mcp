@@ -33,8 +33,6 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
-    files:
-      - formats/*
 
 checksum:
   name_template: "checksums.txt"
@@ -52,8 +50,10 @@ brews:
     license: "MIT"
     install: |
       bin.install "datetime-mcp"
-      pkgshare.install Dir["formats/*.yaml"]
     caveats: |
+      Install built-in format files by running:
+        datetime-mcp format install
+
       Custom format files can be placed in:
         ~/.config/datetime-mcp/formats/
 
