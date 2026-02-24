@@ -27,9 +27,6 @@ func main() {
 		exe, _ := os.Executable()
 		exe, _ = filepath.EvalSymlinks(exe)
 		switch os.Args[1] {
-		case "install":
-			install.Run(os.Args[2:], exe)
-			return
 		case "mcp":
 			if len(os.Args) < 3 {
 				fmt.Fprintf(os.Stderr, "usage: datetime-mcp mcp <add|remove> [flags]\n")
@@ -168,7 +165,6 @@ Usage:
   datetime-mcp [flags]
   datetime-mcp mcp add    [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
   datetime-mcp mcp remove [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
-  datetime-mcp install    [--claude-code-hook] [--claude-desktop] [--claude-code-mcp] [--codex-mcp] [--dry-run]
 
 Subcommands:
   mcp add             Register with AI tool integrations
@@ -176,7 +172,6 @@ Subcommands:
   format install      Download and install built-in format files
   format update       Re-download and overwrite managed format files
   format uninstall    Remove managed format files
-  install             Alias for mcp add (deprecated)
 
 Flags:
   --mcp               Run as MCP server (stdio JSON-RPC)
