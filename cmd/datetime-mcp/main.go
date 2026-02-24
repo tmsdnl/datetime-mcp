@@ -8,6 +8,7 @@ import (
 	"strings"
 	_ "time/tzdata"
 
+	"github.com/tmsdnl/datetime-mcp/internal/format"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 	"github.com/tmsdnl/datetime-mcp/internal/hook"
 	"github.com/tmsdnl/datetime-mcp/internal/install"
@@ -43,6 +44,13 @@ func main() {
 				fmt.Fprintf(os.Stderr, "unknown mcp subcommand %q — use add or remove\n", os.Args[2])
 				os.Exit(1)
 			}
+			return
+		case "format":
+			if len(os.Args) < 3 {
+				fmt.Fprintf(os.Stderr, "usage: datetime-mcp format <install|update|uninstall> [flags]\n")
+				os.Exit(1)
+			}
+			format.Run(os.Args[2], os.Args[3:], version)
 			return
 		}
 	}
@@ -165,6 +173,9 @@ Usage:
 Subcommands:
   mcp add             Register with AI tool integrations
   mcp remove          Remove from AI tool integrations
+  format install      Download and install built-in format files
+  format update       Re-download and overwrite managed format files
+  format uninstall    Remove managed format files
   install             Alias for mcp add (deprecated)
 
 Flags:
