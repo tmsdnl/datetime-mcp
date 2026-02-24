@@ -54,9 +54,9 @@ brews:
       bin.install "datetime-mcp"
       pkgshare.install Dir["formats/*.yaml"]
     post_install: |
-      formats_dir = Pathname.new("#{Dir.home}/.config/datetime-mcp/formats")
-      formats_dir.mkpath
-      Dir["#{pkgshare}/*.yaml"].each { |f| cp f, formats_dir }
+      formats_dir = "#{Dir.home}/.config/datetime-mcp/formats"
+      FileUtils.mkdir_p(formats_dir)
+      Dir.glob("#{pkgshare}/*.yaml").each { |f| FileUtils.cp(f, formats_dir) }
     caveats: |
       Format files are installed to:
         ~/.config/datetime-mcp/formats/
