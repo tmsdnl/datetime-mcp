@@ -184,8 +184,8 @@ Prints the current date/time by default, or starts an MCP server with --mcp.
 
 Usage:
   datetime-mcp [flags]
-  datetime-mcp mcp add    [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
-  datetime-mcp mcp remove [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
+  datetime-mcp mcp add    [--claude-code] [--claude-desktop] [--codex] [--claude-code-hook] [--dry-run]
+  datetime-mcp mcp remove [--claude-code] [--claude-desktop] [--codex] [--claude-code-hook] [--dry-run]
 
 Subcommands:
   mcp add             Register with AI tool integrations

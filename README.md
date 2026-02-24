@@ -34,13 +34,11 @@ datetime-mcp format install
 `datetime-mcp mcp add` registers the binary with your AI tool:
 
 ```sh
-datetime-mcp mcp add --claude-code-hook    # Claude Code hook (recommended)
-datetime-mcp mcp add --claude-desktop      # MCP for Claude Desktop
 datetime-mcp mcp add --claude-code         # MCP for Claude Code
+datetime-mcp mcp add --claude-desktop      # MCP for Claude Desktop
 datetime-mcp mcp add --codex               # MCP for Codex
+datetime-mcp mcp add --claude-code-hook    # Claude Code hook (timestamp set once at session start)
 ```
-
-The hook option is recommended for Claude Code — it injects the current date/time at session start automatically, so the AI always has it without you having to ask.
 
 Add `--dry-run` to preview changes before writing.
 

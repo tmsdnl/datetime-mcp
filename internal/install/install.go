@@ -37,7 +37,7 @@ type Result struct {
 // (--claude-code-mcp, --codex-mcp). Kept for backwards compatibility.
 func Run(args []string, exePath string) {
 	fs := flag.NewFlagSet("install", flag.ExitOnError)
-	claudeCodeHook := fs.Bool("claude-code-hook", false, "Register as Claude Code SessionStart hook (recommended)")
+	claudeCodeHook := fs.Bool("claude-code-hook", false, "Register as Claude Code SessionStart hook")
 	claudeDesktop := fs.Bool("claude-desktop", false, "Register as Claude Desktop MCP server")
 	claudeCodeMCP := fs.Bool("claude-code-mcp", false, "Register as Claude Code MCP server")
 	codexMCP := fs.Bool("codex-mcp", false, "Register as Codex MCP server")
@@ -49,7 +49,7 @@ Usage:
   datetime-mcp install [--claude-code-hook] [--claude-desktop] [--claude-code-mcp] [--codex-mcp] [--dry-run]
 
 Flags:
-  --claude-code-hook  Register as Claude Code SessionStart hook (recommended)
+  --claude-code-hook  Register as Claude Code SessionStart hook
   --claude-desktop    Register as Claude Desktop MCP server
   --claude-code-mcp   Register as Claude Code MCP server (deprecated: use mcp add --claude-code)
   --codex-mcp         Register as Codex MCP server (deprecated: use mcp add --codex)
@@ -83,7 +83,7 @@ Flags:
 // RunMCPAdd parses args and registers datetime-mcp with the requested integrations.
 func RunMCPAdd(args []string, exePath string) {
 	fs := flag.NewFlagSet("mcp add", flag.ExitOnError)
-	claudeCodeHook := fs.Bool("claude-code-hook", false, "Register as Claude Code SessionStart hook (recommended)")
+	claudeCodeHook := fs.Bool("claude-code-hook", false, "Register as Claude Code SessionStart hook")
 	claudeDesktop := fs.Bool("claude-desktop", false, "Register as Claude Desktop MCP server")
 	claudeCode := fs.Bool("claude-code", false, "Register as Claude Code MCP server")
 	codex := fs.Bool("codex", false, "Register as Codex MCP server")
@@ -92,13 +92,13 @@ func RunMCPAdd(args []string, exePath string) {
 		fmt.Print(`Register datetime-mcp with supported AI tool integrations.
 
 Usage:
-  datetime-mcp mcp add [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
+  datetime-mcp mcp add [--claude-code] [--claude-desktop] [--codex] [--claude-code-hook] [--dry-run]
 
 Flags:
-  --claude-code-hook  Register as Claude Code SessionStart hook (recommended)
-  --claude-desktop    Register as Claude Desktop MCP server
   --claude-code       Register as Claude Code MCP server
+  --claude-desktop    Register as Claude Desktop MCP server
   --codex             Register as Codex MCP server
+  --claude-code-hook  Register as Claude Code SessionStart hook
   --dry-run           Preview changes without writing
 `)
 	}
@@ -110,17 +110,17 @@ Flags:
 	}
 
 	var results []Result
-	if *claudeDesktop {
-		results = append(results, installClaudeDesktop(exePath, *dryRun))
-	}
 	if *claudeCode {
 		results = append(results, installClaudeCodeMCP(exePath, *dryRun))
 	}
-	if *claudeCodeHook {
-		results = append(results, installClaudeCodeHook(exePath, *dryRun))
+	if *claudeDesktop {
+		results = append(results, installClaudeDesktop(exePath, *dryRun))
 	}
 	if *codex {
 		results = append(results, installCodexMCP(exePath, *dryRun))
+	}
+	if *claudeCodeHook {
+		results = append(results, installClaudeCodeHook(exePath, *dryRun))
 	}
 
 	printResults(results)
@@ -138,13 +138,13 @@ func RunMCPRemove(args []string, exePath string) {
 		fmt.Print(`Remove datetime-mcp from AI tool integrations.
 
 Usage:
-  datetime-mcp mcp remove [--claude-code-hook] [--claude-desktop] [--claude-code] [--codex] [--dry-run]
+  datetime-mcp mcp remove [--claude-code] [--claude-desktop] [--codex] [--claude-code-hook] [--dry-run]
 
 Flags:
-  --claude-code-hook  Remove Claude Code SessionStart hook
-  --claude-desktop    Remove Claude Desktop MCP server
   --claude-code       Remove Claude Code MCP server
+  --claude-desktop    Remove Claude Desktop MCP server
   --codex             Remove Codex MCP server
+  --claude-code-hook  Remove Claude Code SessionStart hook
   --dry-run           Preview changes without writing
 `)
 	}
@@ -156,17 +156,17 @@ Flags:
 	}
 
 	var results []Result
-	if *claudeDesktop {
-		results = append(results, removeClaudeDesktop(*dryRun))
-	}
 	if *claudeCode {
 		results = append(results, removeClaudeCodeMCP(*dryRun))
 	}
-	if *claudeCodeHook {
-		results = append(results, removeClaudeCodeHook(exePath, *dryRun))
+	if *claudeDesktop {
+		results = append(results, removeClaudeDesktop(*dryRun))
 	}
 	if *codex {
 		results = append(results, removeCodexMCP(*dryRun))
+	}
+	if *claudeCodeHook {
+		results = append(results, removeClaudeCodeHook(exePath, *dryRun))
 	}
 
 	printResults(results)
