@@ -32,9 +32,9 @@ func installClaudeCodeHook(exePath string, dryRun bool) Result {
 		}
 	}
 
-	// Parse SessionStart array.
+	// Parse SessionStart array (treat missing or null as empty).
 	var sessionStart []json.RawMessage
-	if raw, ok := hooksMap["SessionStart"]; ok {
+	if raw, ok := hooksMap["SessionStart"]; ok && string(raw) != "null" {
 		if err := json.Unmarshal(raw, &sessionStart); err != nil {
 			return Result{Target: "Hook", Status: StatusError, Path: path,
 				Err: fmt.Errorf("parsing SessionStart: %w", err)}
@@ -172,17 +172,25 @@ func removeClaudeCodeHook(exePath string, dryRun bool) Result {
 		return Result{Target: "Hook", Status: StatusRemoved, Path: path, DryRun: true}
 	}
 
-	ssRaw, err := json.Marshal(filtered)
-	if err != nil {
-		return Result{Target: "Hook", Status: StatusError, Path: path, Err: err}
+	if len(filtered) == 0 {
+		delete(hooksMap, "SessionStart")
+	} else {
+		ssRaw, err := json.Marshal(filtered)
+		if err != nil {
+			return Result{Target: "Hook", Status: StatusError, Path: path, Err: err}
+		}
+		hooksMap["SessionStart"] = json.RawMessage(ssRaw)
 	}
-	hooksMap["SessionStart"] = json.RawMessage(ssRaw)
 
-	hooksRaw, err := json.Marshal(hooksMap)
-	if err != nil {
-		return Result{Target: "Hook", Status: StatusError, Path: path, Err: err}
+	if len(hooksMap) == 0 {
+		delete(top, "hooks")
+	} else {
+		hooksRaw, err := json.Marshal(hooksMap)
+		if err != nil {
+			return Result{Target: "Hook", Status: StatusError, Path: path, Err: err}
+		}
+		top["hooks"] = json.RawMessage(hooksRaw)
 	}
-	top["hooks"] = json.RawMessage(hooksRaw)
 
 	if err := writeJSONObject(path, top); err != nil {
 		return Result{Target: "Hook", Status: StatusError, Path: path, Err: err}
