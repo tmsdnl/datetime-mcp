@@ -16,10 +16,10 @@ func toolDefinition() map[string]any {
 		"name":  "get_current_datetime",
 		"title": "Current Date and Time",
 		"description": "Returns the current date and time. " +
-			"The format parameter accepts named formats (iso8601, rfc2822, etc.) " +
-			"or Go time layout strings. " +
-			"The timezone parameter accepts IANA tz database identifiers " +
-			"(e.g. America/Los_Angeles, Europe/Vilnius, UTC).",
+			"Call this proactively before any query where recency matters — " +
+			"e.g. \"latest\", \"recent\", \"today\", \"now\", or web searches for current information. " +
+			"The format parameter accepts named formats (iso8601, rfc2822, etc.) or Go time layout strings. " +
+			"The timezone parameter accepts IANA tz database identifiers (e.g. America/Los_Angeles, Europe/Vilnius, UTC).",
 		"inputSchema": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
