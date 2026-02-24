@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func installClaudeCodeMCP(exePath string, dryRun bool) Result {
@@ -61,6 +62,9 @@ func removeClaudeCodeMCP(dryRun bool) Result {
 	}
 	cmd := exec.Command("claude", "mcp", "remove", "datetime")
 	if out, err := cmd.CombinedOutput(); err != nil {
+		if strings.Contains(string(out), "No MCP server found") {
+			return Result{Target: "Claude Code MCP", Status: StatusNotFound, Path: path}
+		}
 		return Result{Target: "Claude Code MCP", Status: StatusError, Path: path,
 			Err: fmt.Errorf("claude mcp remove: %w: %s", err, out)}
 	}

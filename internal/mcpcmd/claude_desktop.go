@@ -96,8 +96,7 @@ func removeClaudeDesktop(dryRun bool) Result {
 	}
 
 	if _, ok := mcpServers["datetime"]; !ok {
-		return Result{Target: "Claude Desktop", Status: StatusNotFound, Path: path,
-			Message: "datetime not registered as MCP server"}
+		return Result{Target: "Claude Desktop", Status: StatusNotFound, Path: path}
 	}
 
 	if dryRun {

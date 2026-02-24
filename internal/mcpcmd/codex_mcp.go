@@ -51,15 +51,21 @@ func removeCodexMCP(dryRun bool) Result {
 	home, _ := os.UserHomeDir()
 	path := filepath.Join(home, ".codex", "config.toml")
 
+	if _, err := exec.LookPath("codex"); err != nil {
+		return Result{Target: "Codex MCP", Status: StatusError, Path: path,
+			Err: fmt.Errorf("codex CLI not found in PATH — run: codex mcp remove datetime-mcp")}
+	}
+
+	// Idempotency check.
+	if exec.Command("codex", "mcp", "get", "datetime-mcp").Run() != nil {
+		return Result{Target: "Codex MCP", Status: StatusNotFound, Path: path}
+	}
+
 	if dryRun {
 		return Result{Target: "Codex MCP", Status: StatusRemoved, Path: path, DryRun: true,
 			Note: "codex mcp remove datetime-mcp"}
 	}
 
-	if _, err := exec.LookPath("codex"); err != nil {
-		return Result{Target: "Codex MCP", Status: StatusError, Path: path,
-			Err: fmt.Errorf("codex CLI not found in PATH — run: codex mcp remove datetime-mcp")}
-	}
 	cmd := exec.Command("codex", "mcp", "remove", "datetime-mcp")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return Result{Target: "Codex MCP", Status: StatusError, Path: path,
