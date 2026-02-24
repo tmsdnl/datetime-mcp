@@ -53,16 +53,11 @@ brews:
     install: |
       bin.install "datetime-mcp"
       pkgshare.install Dir["formats/*.yaml"]
-    post_install: |
-      formats_dir = "#{Dir.home}/.config/datetime-mcp/formats"
-      FileUtils.mkdir_p(formats_dir)
-      Dir.glob("#{pkgshare}/*.yaml").each { |f| FileUtils.cp(f, formats_dir) }
     caveats: |
-      Format files are installed to:
+      Custom format files can be placed in:
         ~/.config/datetime-mcp/formats/
 
-      To fully remove datetime-mcp, also delete:
-        ~/.config/datetime-mcp/
+      To fully remove datetime-mcp, also delete that directory.
     test: |
       system "#{bin}/datetime-mcp", "--version"
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	_ "time/tzdata"
 
 	"github.com/tmsdnl/datetime-mcp/internal/detect"
@@ -55,11 +56,13 @@ func main() {
 		os.Exit(0)
 	}
 
+	resolvedDir := resolveFormatsDir(*formatsDir)
+
 	// Mode selection: --mcp flag or non-TTY stdin → MCP server mode.
 	if *forceMCP || !detect.IsTerminal(os.Stdin) {
 		if err := mcp.Run(mcp.Config{
 			Timezone:   *tz,
-			FormatsDir: *formatsDir,
+			FormatsDir: resolvedDir,
 			Log:        *logFlag,
 			Version:    version,
 		}); err != nil {
@@ -73,7 +76,7 @@ func main() {
 	if err := hook.Run(hook.Config{
 		Format:     *format,
 		Timezone:   *tz,
-		FormatsDir: *formatsDir,
+		FormatsDir: resolvedDir,
 		Log:        *logFlag,
 	}); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -87,6 +90,44 @@ func defaultFormatsDir() string {
 	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".config", "datetime-mcp", "formats")
+}
+
+// resolveFormatsDir returns the directory to load formats from.
+// Prefers the XDG path if it contains yaml files, then falls back to the
+// share directory adjacent to the binary (Homebrew pkgshare layout).
+func resolveFormatsDir(override string) string {
+	if override != "" {
+		return override
+	}
+	xdg := defaultFormatsDir()
+	if hasYAML(xdg) {
+		return xdg
+	}
+	// Homebrew installs formats to {prefix}/share/datetime-mcp/ alongside the
+	// binary at {prefix}/bin/datetime-mcp.
+	if exe, err := os.Executable(); err == nil {
+		if exe, err = filepath.EvalSymlinks(exe); err == nil {
+			dir := filepath.Clean(filepath.Join(filepath.Dir(exe), "..", "share", "datetime-mcp"))
+			if hasYAML(dir) {
+				return dir
+			}
+		}
+	}
+	return xdg
+}
+
+func hasYAML(dir string) bool {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		n := e.Name()
+		if strings.HasSuffix(n, ".yaml") || strings.HasSuffix(n, ".yml") {
+			return true
+		}
+	}
+	return false
 }
 
 func printHelp(formatsDir string) {
