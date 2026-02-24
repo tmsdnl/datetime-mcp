@@ -67,10 +67,7 @@ func installClaudeCodeHook(exePath string, dryRun bool) Result {
 	}
 
 	if dryRun {
-		b, _ := json.MarshalIndent(map[string]any{
-			"hooks": []map[string]string{{"type": "command", "command": exePath}},
-		}, "", "  ")
-		return Result{Target: "Hook", Status: StatusAdded, Path: path, DryRun: true, Snippet: string(b)}
+		return Result{Target: "Hook", Status: StatusAdded, Path: path, DryRun: true}
 	}
 
 	// Build new hook entry.
@@ -172,8 +169,7 @@ func removeClaudeCodeHook(exePath string, dryRun bool) Result {
 	}
 
 	if dryRun {
-		return Result{Target: "Hook", Status: StatusRemoved, Path: path, DryRun: true,
-			Note: fmt.Sprintf("remove hook entry for %s from %s", exePath, shortPath(path))}
+		return Result{Target: "Hook", Status: StatusRemoved, Path: path, DryRun: true}
 	}
 
 	ssRaw, err := json.Marshal(filtered)

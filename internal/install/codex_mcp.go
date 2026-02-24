@@ -52,7 +52,7 @@ func removeCodexMCP(dryRun bool) Result {
 	path := filepath.Join(home, ".codex", "config.toml")
 
 	if dryRun {
-		return Result{Target: "Codex MCP", Status: StatusAdded, Path: path, DryRun: true,
+		return Result{Target: "Codex MCP", Status: StatusRemoved, Path: path, DryRun: true,
 			Note: "codex mcp remove datetime-mcp"}
 	}
 

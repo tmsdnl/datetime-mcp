@@ -119,7 +119,7 @@ func printResult(r Result) {
 			fmt.Printf("%s: Updated %s\n", r.Name, path)
 		}
 	case StatusSkipped:
-		fmt.Printf("%s: Skipped (already exists)\n", r.Name)
+		fmt.Printf("%s: Already installed\n", r.Name)
 	case StatusRemoved:
 		if r.DryRun {
 			fmt.Printf("%s: Would remove %s\n", r.Name, path)
@@ -127,7 +127,7 @@ func printResult(r Result) {
 			fmt.Printf("%s: Removed %s\n", r.Name, path)
 		}
 	case StatusNotFound:
-		fmt.Printf("%s: Not found\n", r.Name)
+		fmt.Printf("%s: Not installed\n", r.Name)
 	case StatusError:
 		fmt.Printf("%s: Error — %v\n", r.Name, r.Err)
 	}

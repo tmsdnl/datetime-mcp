@@ -174,10 +174,7 @@ Flags:
 
 func printResults(results []Result) {
 	hasError := false
-	for i, r := range results {
-		if i > 0 {
-			fmt.Println()
-		}
+	for _, r := range results {
 		printResult(r)
 		if r.Status == StatusError {
 			hasError = true
@@ -193,15 +190,9 @@ func printResult(r Result) {
 	case StatusAdded:
 		if r.DryRun {
 			if r.Note != "" {
-				fmt.Printf("%s: Run\n$ %s\n", r.Target, r.Note)
+				fmt.Printf("%s: Would add — run: $ %s\n", r.Target, r.Note)
 			} else {
-				fmt.Printf("%s: Append to %s\n", r.Target, shortPath(r.Path))
-				if r.Snippet != "" {
-					fmt.Println()
-					for _, line := range strings.Split(r.Snippet, "\n") {
-						fmt.Println(line)
-					}
-				}
+				fmt.Printf("%s: Would add to %s\n", r.Target, shortPath(r.Path))
 			}
 		} else {
 			fmt.Printf("%s: Added to %s\n", r.Target, shortPath(r.Path))
@@ -209,7 +200,7 @@ func printResult(r Result) {
 	case StatusRemoved:
 		if r.DryRun {
 			if r.Note != "" {
-				fmt.Printf("%s: Would remove — %s\n", r.Target, r.Note)
+				fmt.Printf("%s: Would remove — run: $ %s\n", r.Target, r.Note)
 			} else {
 				fmt.Printf("%s: Would remove from %s\n", r.Target, shortPath(r.Path))
 			}
@@ -217,7 +208,7 @@ func printResult(r Result) {
 			fmt.Printf("%s: Removed from %s\n", r.Target, shortPath(r.Path))
 		}
 	case StatusExisting:
-		fmt.Printf("%s: Existing\n", r.Target)
+		fmt.Printf("%s: Already registered\n", r.Target)
 	case StatusNotFound:
 		if r.Message != "" {
 			fmt.Printf("%s: Not found — %s\n", r.Target, r.Message)

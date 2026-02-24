@@ -51,7 +51,7 @@ func removeClaudeCodeMCP(dryRun bool) Result {
 	path := filepath.Join(home, ".claude.json")
 
 	if dryRun {
-		return Result{Target: "Claude Code MCP", Status: StatusAdded, Path: path, DryRun: true,
+		return Result{Target: "Claude Code MCP", Status: StatusRemoved, Path: path, DryRun: true,
 			Note: "claude mcp remove datetime"}
 	}
 
