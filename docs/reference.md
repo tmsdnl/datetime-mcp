@@ -80,7 +80,7 @@ Single quotes escape literal text: `{yyyy-MM-dd'T'HH:mm:ss}` → `2026-02-23T14:
 
 ## Manual Configuration
 
-`datetime-mcp install --dry-run` shows the exact changes each flag would make. The snippets below are for reference if you prefer editing config files by hand.
+`datetime-mcp mcp add --dry-run` shows the exact changes each flag would make. The snippets below are for reference if you prefer editing config files by hand.
 
 ### Claude Code hook (`~/.claude/settings.json`)
 
@@ -104,7 +104,8 @@ Single quotes escape literal text: `{yyyy-MM-dd'T'HH:mm:ss}` → `2026-02-23T14:
 {
   "mcpServers": {
     "datetime": {
-      "command": "/usr/local/bin/datetime-mcp"
+      "command": "/usr/local/bin/datetime-mcp",
+      "args": ["--mcp"]
     }
   }
 }
@@ -117,7 +118,7 @@ With timezone override:
   "mcpServers": {
     "datetime": {
       "command": "/usr/local/bin/datetime-mcp",
-      "args": ["--tz", "America/Los_Angeles"]
+      "args": ["--mcp", "--tz", "America/Los_Angeles"]
     }
   }
 }
@@ -126,7 +127,7 @@ With timezone override:
 ### Claude Code MCP
 
 ```sh
-claude mcp add --scope user datetime /usr/local/bin/datetime-mcp
+claude mcp add --scope user datetime /usr/local/bin/datetime-mcp --mcp
 ```
 
 ### Codex (`~/.codex/config.toml`)

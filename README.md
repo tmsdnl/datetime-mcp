@@ -2,7 +2,7 @@
 
 A self-contained date/time provider for [Claude Desktop](https://claude.ai/download), [Claude Code](https://github.com/anthropics/claude-code), and [Codex](https://github.com/openai/codex).
 
-Zero-dependency static binary. Prints the current date/time when run from a terminal; starts an MCP server when stdin is a pipe.
+Zero-dependency static binary. Prints the current date/time by default (hook mode); use `--mcp` to run as an MCP server.
 
 ## Installation
 
@@ -10,6 +10,7 @@ Zero-dependency static binary. Prints the current date/time when run from a term
 
 ```sh
 brew install tmsdnl/mcp/datetime-mcp
+datetime-mcp format install   # download built-in format files
 ```
 
 ### Other
@@ -22,27 +23,28 @@ go install github.com/tmsdnl/datetime-mcp/cmd/datetime-mcp@latest
 # https://github.com/tmsdnl/datetime-mcp/releases
 ```
 
-Then install the format files from the release archive:
+Then install the built-in format files:
 
 ```sh
-mkdir -p ~/.config/datetime-mcp/formats
-cp formats/*.yaml ~/.config/datetime-mcp/formats/
+datetime-mcp format install
 ```
 
 ## Setup
 
-`datetime-mcp install` registers the binary with your AI tool:
+`datetime-mcp mcp add` registers the binary with your AI tool:
 
 ```sh
-datetime-mcp install --claude-code-hook    # Claude Code hook (recommended)
-datetime-mcp install --claude-desktop      # MCP for Claude Desktop
-datetime-mcp install --claude-code-mcp     # MCP for Claude Code
-datetime-mcp install --codex-mcp           # MCP for Codex
+datetime-mcp mcp add --claude-code-hook    # Claude Code hook (recommended)
+datetime-mcp mcp add --claude-desktop      # MCP for Claude Desktop
+datetime-mcp mcp add --claude-code         # MCP for Claude Code
+datetime-mcp mcp add --codex               # MCP for Codex
 ```
 
 The hook option is recommended for Claude Code — it injects the current date/time at session start automatically, so the AI always has it without you having to ask.
 
 Add `--dry-run` to preview changes before writing.
+
+To unregister, use `datetime-mcp mcp remove` with the same flags.
 
 ## Usage
 
@@ -57,7 +59,7 @@ datetime-mcp                          # default output
 datetime-mcp --format iso8601         # named format
 datetime-mcp --format "{yyyy-MM-dd}"  # template
 datetime-mcp --tz Europe/Vilnius      # timezone override
-datetime-mcp --mcp                    # force MCP server mode
+datetime-mcp --mcp                    # MCP server mode
 ```
 
 See [docs/reference.md](docs/reference.md) for format files, template syntax, and manual configuration.
@@ -65,7 +67,7 @@ See [docs/reference.md](docs/reference.md) for format files, template syntax, an
 ## Flags
 
 ```
---mcp               Force MCP server mode
+--mcp               Run as MCP server (stdio JSON-RPC)
 --tz string         Override timezone (IANA identifier)
 --format string     Named format, {template}, or Go time layout
 --formats-dir path  Format files directory (default: {XDG_CONFIG_HOME}/datetime-mcp/formats/)
