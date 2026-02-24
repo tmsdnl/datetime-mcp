@@ -48,15 +48,21 @@ brews:
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
     homepage: "https://github.com/tmsdnl/datetime-mcp"
-    description: "Self-contained date/time provider for Claude Desktop and Claude Code"
+    description: "Self-contained date/time provider for Claude Desktop, Claude Code, and Codex"
     license: "MIT"
     install: |
       bin.install "datetime-mcp"
-      formats_dir = "#{Dir.home}/.config/datetime-mcp/formats"
-      FileUtils.mkdir_p(formats_dir)
-      Dir.glob("formats/*.yaml").each do |f|
-        FileUtils.cp(f, formats_dir)
-      end
+      pkgshare.install Dir["formats/*.yaml"]
+    post_install: |
+      formats_dir = Pathname.new("#{Dir.home}/.config/datetime-mcp/formats")
+      formats_dir.mkpath
+      Dir["#{pkgshare}/*.yaml"].each { |f| cp f, formats_dir }
+    caveats: |
+      Format files are installed to:
+        ~/.config/datetime-mcp/formats/
+
+      To fully remove datetime-mcp, also delete:
+        ~/.config/datetime-mcp/
     test: |
       system "#{bin}/datetime-mcp", "--version"
 
