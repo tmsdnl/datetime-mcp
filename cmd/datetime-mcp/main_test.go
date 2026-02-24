@@ -11,7 +11,9 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 	_ "time/tzdata"
 )
 
@@ -207,5 +209,53 @@ func TestMCPMode_PipeAutoDetect(t *testing.T) {
 	}
 	if resp["result"] == nil {
 		t.Errorf("ping response missing result: %v", resp)
+	}
+}
+
+func TestMCPMode_SIGTERMShutdown(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("SIGTERM not available on Windows")
+	}
+	// Create a pipe for stdin — keep write end open so server doesn't see EOF.
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	defer w.Close()
+
+	cmd := exec.Command(binaryPath, "--mcp")
+	cmd.Stdin = r
+	var outBuf, errBuf bytes.Buffer
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
+
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("start: %v", err)
+	}
+
+	// Give the server a moment to start.
+	time.Sleep(100 * time.Millisecond)
+
+	// Send SIGTERM.
+	if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+		t.Fatalf("signal: %v", err)
+	}
+
+	// Wait for exit with timeout.
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	select {
+	case err := <-done:
+		if err != nil {
+			if ee, ok := err.(*exec.ExitError); ok {
+				t.Errorf("process exited with non-zero code %d on SIGTERM", ee.ExitCode())
+			} else {
+				t.Errorf("wait error: %v", err)
+			}
+		}
+	case <-time.After(5 * time.Second):
+		cmd.Process.Kill()
+		t.Fatal("process did not exit within 5s after SIGTERM")
 	}
 }

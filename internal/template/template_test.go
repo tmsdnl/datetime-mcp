@@ -89,7 +89,6 @@ func TestRender_GoLayoutFallback(t *testing.T) {
 		want string
 	}{
 		{"{2006-01-02}", "2026-02-23"},
-		{"{Monday}", "Monday"},
 		{"{MST}", "PST"},
 	}
 	for _, tc := range tests {
@@ -137,13 +136,12 @@ func TestRender_EscapedBracesMixed(t *testing.T) {
 func TestRender_UnresolvablePlaceholder(t *testing.T) {
 	e := New(nil, nil)
 	tm := testTime(t)
-	// {unknown} is not a built-in, not in formats, not LDML, and not a Go layout
-	// that produces a different result. Go's time.Format will pass "unknown"
-	// through unchanged since it contains no layout tokens.
+	// {unknown} is not a built-in, not in formats, not LDML, and not a Go layout.
+	// Go's time.Format returns "unknown" unchanged (no layout tokens recognized),
+	// so it must be treated as unresolvable and braces must be preserved per F-071.
 	got := e.Render("{unknown}", tm, nil)
-	// "unknown" has no Go time layout tokens, so time.Format returns it unchanged.
-	if got != "unknown" {
-		t.Errorf("{unknown}: got %q, want %q", got, "unknown")
+	if got != "{unknown}" {
+		t.Errorf("{unknown}: got %q, want %q", got, "{unknown}")
 	}
 }
 

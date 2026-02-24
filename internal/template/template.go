@@ -123,11 +123,13 @@ func (e *Engine) resolvePlaceholder(expr string, t time.Time, visited map[string
 
 	// Priority 4: Go layout string (fallback).
 	formatted := t.Format(expr)
-	// If the format produced something that looks unchanged (not a layout),
-	// we still return it — Go's time.Format passes unknown sequences through.
-	// Only return original placeholder if the expression is empty.
 	if expr == "" {
 		return "{}"
+	}
+	// If Go's time.Format returned the expression unchanged, no layout tokens were
+	// recognized — treat as unresolvable and preserve braces per F-071.
+	if formatted == expr {
+		return "{" + expr + "}"
 	}
 	return formatted
 }
