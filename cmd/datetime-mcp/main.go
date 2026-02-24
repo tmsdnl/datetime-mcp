@@ -10,6 +10,7 @@ import (
 	"github.com/tmsdnl/datetime-mcp/internal/detect"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 	"github.com/tmsdnl/datetime-mcp/internal/hook"
+	"github.com/tmsdnl/datetime-mcp/internal/install"
 	"github.com/tmsdnl/datetime-mcp/internal/mcp"
 )
 
@@ -21,10 +22,17 @@ var (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "install" {
+		exe, _ := os.Executable()
+		exe, _ = filepath.EvalSymlinks(exe)
+		install.Run(os.Args[2:], exe)
+		return
+	}
+
 	var (
 		forceMCP   = flag.Bool("mcp", false, "Force MCP server mode (override TTY auto-detection)")
 		tz         = flag.String("tz", "", "Override timezone (IANA tz database identifier)")
-		format     = flag.String("format", "", "Output format for hook mode")
+		format     = flag.String("format", "", "Output format")
 		formatsDir = flag.String("formats-dir", "", "Format files directory (default: {XDG_CONFIG_HOME}/datetime-mcp/formats/)")
 		logFlag    = flag.Bool("log", false, "Enable diagnostic logging to stderr")
 		showVer    = flag.Bool("version", false, "Print version, commit hash, and build date")
@@ -87,18 +95,23 @@ func printHelp(formatsDir string) {
 		dir = defaultFormatsDir()
 	}
 
-	fmt.Print(`datetime-mcp [flags]
+	fmt.Print(`A date/time provider for Claude Desktop, Claude Code, and Codex.
+Prints the current date/time when run from a terminal, or starts an MCP
+server when stdin is a pipe.
 
-A self-contained date/time provider for Claude Desktop and Claude Code.
-Automatically detects mode: prints datetime and exits when run from a
-terminal, or starts an MCP server when stdin is a pipe.
+Usage:
+  datetime-mcp [flags]
+  datetime-mcp install [--claude-code-hook] [--claude-desktop] [--claude-code-mcp] [--codex-mcp] [--dry-run]
+
+Subcommands:
+  install             Register with supported AI tool integrations
 
 Flags:
   --mcp               Force MCP server mode (override TTY auto-detection)
   --tz string         Override timezone (IANA tz database identifier).
                       Falls back to TZ env var, then system local timezone.
                       Examples: America/Los_Angeles, Europe/Vilnius, UTC
-  --format string     Output format for hook mode. Accepts a named format,
+  --format string     Output format. Accepts a named format,
                       a template string with {placeholders}, or a Go time
                       layout string. Default: "default" format file.
   --formats-dir path  Format files directory. Overrides the default XDG path.

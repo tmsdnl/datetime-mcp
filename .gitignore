@@ -5,3 +5,4 @@ dist/
 
 # Claude Code session data
 .claude/
+specs/
