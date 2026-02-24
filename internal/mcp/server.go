@@ -117,6 +117,12 @@ func (s *server) serve() error {
 				fmt.Fprintf(s.out, "%s\n", data)
 			}
 		}
+		if err := scanner.Err(); err != nil {
+			resp := errorResponse(nil, -32700, "transport error: "+err.Error())
+			if data, merr := json.Marshal(resp); merr == nil {
+				fmt.Fprintf(s.out, "%s\n", data)
+			}
+		}
 	}()
 
 	select {

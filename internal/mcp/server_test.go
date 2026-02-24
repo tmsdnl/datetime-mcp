@@ -74,6 +74,22 @@ func TestHandleInitialize(t *testing.T) {
 	if serverInfo["name"] != "datetime-mcp" {
 		t.Errorf("serverInfo.name = %v", serverInfo["name"])
 	}
+	// F-024: description must match exactly.
+	if serverInfo["description"] != "Self-contained date/time provider for Claude Desktop and Claude Code" {
+		t.Errorf("serverInfo.description = %v", serverInfo["description"])
+	}
+	// version must be a string (empty in test since no version set).
+	if _, ok := serverInfo["version"].(string); !ok {
+		t.Errorf("serverInfo.version is not a string: %T", serverInfo["version"])
+	}
+	// F-023: listChanged must be false.
+	toolsCap, ok := caps["tools"].(map[string]any)
+	if !ok {
+		t.Fatal("capabilities.tools is not a map")
+	}
+	if toolsCap["listChanged"] != false {
+		t.Errorf("capabilities.tools.listChanged = %v, want false", toolsCap["listChanged"])
+	}
 }
 
 func TestHandleInitialized_NoResponse(t *testing.T) {
@@ -359,5 +375,48 @@ func TestFullLifecycle(t *testing.T) {
 	sc := callResult["structuredContent"].(map[string]any)
 	if sc["datetime"] == nil || sc["timezone"] == nil || sc["utc_offset"] == nil || sc["unix"] == nil {
 		t.Errorf("structuredContent missing fields: %v", sc)
+	}
+}
+
+func TestServeLoop_OversizedInput(t *testing.T) {
+	// Build a line that exceeds the 1 MB scanner buffer limit.
+	// The scanner will return an error via scanner.Err() instead of delivering the line.
+	var sb strings.Builder
+	sb.WriteString(`{"jsonrpc":"2.0","id":1,"method":"ping","params":"`)
+	for i := 0; i < 1024*1024+1; i++ {
+		sb.WriteByte('x')
+	}
+	sb.WriteString("\"}\n")
+
+	s := testServer(t)
+	var outBuf bytes.Buffer
+	s.out = &outBuf
+	s.in = strings.NewReader(sb.String())
+
+	if err := s.serve(); err != nil {
+		t.Fatalf("serve() returned error: %v", err)
+	}
+
+	// Parse all output lines and expect at least one error response with code -32700.
+	scanner := bufio.NewScanner(&outBuf)
+	var responses []map[string]any
+	for scanner.Scan() {
+		var resp map[string]any
+		if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
+			t.Fatalf("invalid JSON in output: %v\n%s", err, scanner.Text())
+		}
+		responses = append(responses, resp)
+	}
+
+	if len(responses) == 0 {
+		t.Fatal("expected at least one error response for oversized input, got none")
+	}
+	errObj, ok := responses[0]["error"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected first response to have an 'error' field, got: %v", responses[0])
+	}
+	code, ok := errObj["code"].(float64)
+	if !ok || int(code) != -32700 {
+		t.Errorf("error code = %v, want -32700", errObj["code"])
 	}
 }
