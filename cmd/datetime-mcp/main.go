@@ -26,6 +26,7 @@ func main() {
 	if len(os.Args) > 1 {
 		exe, _ := os.Executable()
 		exe, _ = filepath.EvalSymlinks(exe)
+		exe = stableExePath(exe)
 		switch os.Args[1] {
 		case "mcp":
 			if len(os.Args) < 3 {
@@ -136,6 +137,26 @@ func resolveFormatsDir(override string) string {
 		}
 	}
 	return xdg
+}
+
+// stableExePath returns a stable path to the binary that survives upgrades.
+// If the resolved binary is inside a Homebrew Cellar, it returns the
+// corresponding symlink in the prefix bin/ directory instead of the
+// versioned Cellar path, so registered hooks/MCP entries don't break on
+// `brew upgrade`.
+func stableExePath(resolved string) string {
+	parts := strings.Split(resolved, string(filepath.Separator))
+	for i, part := range parts {
+		if part == "Cellar" && i+3 < len(parts) {
+			prefix := filepath.Join(append([]string{"/"}, parts[:i]...)...)
+			binary := parts[len(parts)-1]
+			candidate := filepath.Join(prefix, "bin", binary)
+			if target, err := filepath.EvalSymlinks(candidate); err == nil && target == resolved {
+				return candidate
+			}
+		}
+	}
+	return resolved
 }
 
 func hasYAML(dir string) bool {
