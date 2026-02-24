@@ -55,12 +55,12 @@ func installClaudeDesktop(exePath string, dryRun bool) Result {
 	}
 
 	if dryRun {
-		b, _ := json.MarshalIndent(map[string]map[string]string{"datetime": {"command": exePath}}, "", "  ")
+		b, _ := json.MarshalIndent(map[string]any{"datetime": map[string]any{"command": exePath, "args": []string{"--mcp"}}}, "", "  ")
 		return Result{Target: "Claude Desktop", Status: StatusAdded, Path: path, DryRun: true, Snippet: string(b)}
 	}
 
 	// Add the entry.
-	entry, _ := json.Marshal(map[string]string{"command": exePath})
+	entry, _ := json.Marshal(map[string]any{"command": exePath, "args": []string{"--mcp"}})
 	mcpServers["datetime"] = json.RawMessage(entry)
 
 	serialized, err := json.Marshal(mcpServers)

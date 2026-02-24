@@ -191,26 +191,6 @@ func TestMCPMode_ToolCall(t *testing.T) {
 	}
 }
 
-func TestMCPMode_PipeAutoDetect(t *testing.T) {
-	// Without --mcp, piping stdin should auto-detect pipe mode and enter MCP mode.
-	msg := `{"jsonrpc":"2.0","id":1,"method":"ping"}` + "\n"
-	stdout, _, code := run(t, msg) // no --mcp flag, but stdin is a pipe via cmd.Stdin
-	if code != 0 {
-		t.Fatalf("exited with %d", code)
-	}
-	// Should have ping response.
-	scanner := bufio.NewScanner(strings.NewReader(stdout))
-	if !scanner.Scan() {
-		t.Fatal("no response for ping")
-	}
-	var resp map[string]any
-	if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-	if resp["result"] == nil {
-		t.Errorf("ping response missing result: %v", resp)
-	}
-}
 
 func TestMCPMode_SIGTERMShutdown(t *testing.T) {
 	if runtime.GOOS == "windows" {

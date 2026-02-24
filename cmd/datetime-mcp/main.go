@@ -8,7 +8,6 @@ import (
 	"strings"
 	_ "time/tzdata"
 
-	"github.com/tmsdnl/datetime-mcp/internal/detect"
 	"github.com/tmsdnl/datetime-mcp/internal/formats"
 	"github.com/tmsdnl/datetime-mcp/internal/hook"
 	"github.com/tmsdnl/datetime-mcp/internal/install"
@@ -31,7 +30,7 @@ func main() {
 	}
 
 	var (
-		forceMCP   = flag.Bool("mcp", false, "Force MCP server mode (override TTY auto-detection)")
+		mcpMode    = flag.Bool("mcp", false, "Run as MCP server (stdio JSON-RPC)")
 		tz         = flag.String("tz", "", "Override timezone (IANA tz database identifier)")
 		format     = flag.String("format", "", "Output format")
 		formatsDir = flag.String("formats-dir", "", "Format files directory (default: {XDG_CONFIG_HOME}/datetime-mcp/formats/)")
@@ -58,8 +57,8 @@ func main() {
 
 	resolvedDir := resolveFormatsDir(*formatsDir)
 
-	// Mode selection: --mcp flag or non-TTY stdin → MCP server mode.
-	if *forceMCP || !detect.IsTerminal(os.Stdin) {
+	// Mode selection: --mcp flag → MCP server mode, otherwise hook mode.
+	if *mcpMode {
 		if err := mcp.Run(mcp.Config{
 			Timezone:   *tz,
 			FormatsDir: resolvedDir,
@@ -137,8 +136,7 @@ func printHelp(formatsDir string) {
 	}
 
 	fmt.Print(`A date/time provider for Claude Desktop, Claude Code, and Codex.
-Prints the current date/time when run from a terminal, or starts an MCP
-server when stdin is a pipe.
+Prints the current date/time by default, or starts an MCP server with --mcp.
 
 Usage:
   datetime-mcp [flags]
@@ -148,7 +146,7 @@ Subcommands:
   install             Register with supported AI tool integrations
 
 Flags:
-  --mcp               Force MCP server mode (override TTY auto-detection)
+  --mcp               Run as MCP server (stdio JSON-RPC)
   --tz string         Override timezone (IANA tz database identifier).
                       Falls back to TZ env var, then system local timezone.
                       Examples: America/Los_Angeles, Europe/Vilnius, UTC
