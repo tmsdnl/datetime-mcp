@@ -124,9 +124,21 @@ func TestHandleInitialize_VersionNegotiation(t *testing.T) {
 
 func TestHandleInitialized_NoResponse(t *testing.T) {
 	s := testServer(t)
-	resp := s.handleMessage([]byte(`{"jsonrpc":"2.0","method":"initialized"}`))
+	for _, method := range []string{"initialized", "notifications/initialized"} {
+		msg := `{"jsonrpc":"2.0","method":"` + method + `"}`
+		resp := s.handleMessage([]byte(msg))
+		if resp != nil {
+			t.Errorf("notification %q should return nil, got %v", method, resp)
+		}
+	}
+}
+
+func TestUnknownNotification_NoResponse(t *testing.T) {
+	s := testServer(t)
+	// Unknown notifications (no id) must be silently ignored per MCP spec.
+	resp := s.handleMessage([]byte(`{"jsonrpc":"2.0","method":"notifications/unknown"}`))
 	if resp != nil {
-		t.Error("initialized notification should return nil")
+		t.Errorf("unknown notification should return nil, got %v", resp)
 	}
 }
 

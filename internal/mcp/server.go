@@ -179,7 +179,7 @@ func (s *server) handleMessage(data []byte) *jsonrpcResponse {
 	switch req.Method {
 	case "initialize":
 		return s.handleInitialize(req)
-	case "initialized":
+	case "initialized", "notifications/initialized":
 		return nil // notification, no response
 	case "ping":
 		return resultResponse(req.ID, map[string]any{})
@@ -188,6 +188,10 @@ func (s *server) handleMessage(data []byte) *jsonrpcResponse {
 	case "tools/call":
 		return s.handleToolsCall(req)
 	default:
+		// Notifications have no id; silently ignore unknown ones per spec.
+		if req.ID == nil {
+			return nil
+		}
 		return errorResponse(req.ID, -32601, "method not found: "+req.Method)
 	}
 }
