@@ -92,6 +92,36 @@ func TestHandleInitialize(t *testing.T) {
 	}
 }
 
+func TestHandleInitialize_VersionNegotiation(t *testing.T) {
+	tests := []struct {
+		clientVersion string
+		wantVersion   string
+	}{
+		{"2024-11-05", "2024-11-05"}, // echo supported older version
+		{"2025-03-26", "2025-03-26"}, // echo supported older version
+		{"2025-06-18", "2025-06-18"}, // echo supported version
+		{"2025-11-25", "2025-11-25"}, // echo latest
+		{"1999-01-01", latestVersion}, // unknown → fall back to latest
+		{"", latestVersion},           // missing → fall back to latest
+	}
+	for _, tc := range tests {
+		s := testServer(t)
+		resp := s.exchange(t, map[string]any{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"method":  "initialize",
+			"params": map[string]any{
+				"protocolVersion": tc.clientVersion,
+				"clientInfo":      map[string]any{"name": "test", "version": "1.0"},
+			},
+		})
+		got := resp["result"].(map[string]any)["protocolVersion"]
+		if got != tc.wantVersion {
+			t.Errorf("client=%q: protocolVersion = %v, want %v", tc.clientVersion, got, tc.wantVersion)
+		}
+	}
+}
+
 func TestHandleInitialized_NoResponse(t *testing.T) {
 	s := testServer(t)
 	resp := s.handleMessage([]byte(`{"jsonrpc":"2.0","method":"initialized"}`))

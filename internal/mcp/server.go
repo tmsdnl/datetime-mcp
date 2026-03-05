@@ -192,9 +192,30 @@ func (s *server) handleMessage(data []byte) *jsonrpcResponse {
 	}
 }
 
+// supportedVersions lists the MCP protocol versions this server supports,
+// from oldest to newest. Used for version negotiation during initialize.
+var supportedVersions = map[string]bool{
+	"2024-11-05": true,
+	"2025-03-26": true,
+	"2025-06-18": true,
+	"2025-11-25": true,
+}
+
+const latestVersion = "2025-11-25"
+
 func (s *server) handleInitialize(req jsonrpcRequest) *jsonrpcResponse {
+	var params struct {
+		ProtocolVersion string `json:"protocolVersion"`
+	}
+	_ = json.Unmarshal(req.Params, &params)
+
+	version := latestVersion
+	if supportedVersions[params.ProtocolVersion] {
+		version = params.ProtocolVersion
+	}
+
 	result := map[string]any{
-		"protocolVersion": "2025-11-25",
+		"protocolVersion": version,
 		"capabilities": map[string]any{
 			"tools": map[string]any{
 				"listChanged": false,
