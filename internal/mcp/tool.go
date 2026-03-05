@@ -19,7 +19,7 @@ func toolDefinition() map[string]any {
 			"Call this proactively before any query where recency matters — " +
 			"e.g. \"latest\", \"recent\", \"today\", \"now\", or web searches for current information. " +
 			"The format parameter accepts named formats (iso8601, rfc2822, etc.) or Go time layout strings. " +
-			"The timezone parameter accepts IANA tz database identifiers (e.g. America/Los_Angeles, Europe/Vilnius, UTC).",
+			"The timezone parameter accepts IANA tz database identifiers and should only be set when the user requests a specific timezone.",
 		"inputSchema": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
